@@ -19,7 +19,7 @@ A Python agent reads a long AI answer about speakers and finds every factual cla
 | `app/api.py`, `app/db.py`, `app/schema.sql` | FastAPI routes and parameterized psycopg3 SQL. |
 | `app/providers/` | `ollama.py` (the one used for the live runs), `gemini.py` (implemented but **not run**, since no key was available) and `fake.py` (tests). |
 | `scripts/run_eval.py`, `compare_runs.py`, `export_langfuse.py` | CLI entry points. |
-| `runs/` | Live-run reports (`*.json`) and sanitized model/tool exchanges (`*_exchanges.jsonl`). At submission only v1 development had finished; see REPORT §4–5. |
+| `runs/` | The four live-run reports (`*.json`: v1/v2 × development/check) and sanitized model/tool exchanges (`*_exchanges.jsonl`). v2 development and both check runs were added after the deadline (see REPORT §4–5). |
 | `reports/` | REPORT.md, test output, Langfuse exports, comparison. |
 
 ## Setup

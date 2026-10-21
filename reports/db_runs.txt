@@ -1,0 +1,8 @@
+ agent_version |    split    |  status   |             source_revision              | answers | claims | metrics_null 
+---------------+-------------+-----------+------------------------------------------+---------+--------+--------------
+ v1            | development | completed | 823f744670780a41c90325f9081ccb297219778d |      40 |    293 | f
+ v2            | development | completed | ac71526afe1c715d08302fedd6f644b65b4699c5 |      40 |    253 | f
+ v1            | check       | completed | d6bbb6e9132d1ba84f7100dd30d292696ecf2b57 |      10 |     72 | t
+ v2            | check       | completed | d6bbb6e9132d1ba84f7100dd30d292696ecf2b57 |      10 |     86 | t
+(4 rows)
+

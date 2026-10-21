@@ -58,13 +58,45 @@ Other v1 observations (not changed in v2, so the comparison stays one-variable):
 Span extraction, labels, turn and retry limits, validation, scorer, data, provider, model and settings are all unchanged.
 Also added, as observability only (applies to both versions): when a `<tool_call>` block can't be parsed, a raw excerpt of it goes into the generation observation, so the 7 nondeterministic JSON failures can be diagnosed next time.
 
-## 4. v2 on development: results
+## 4. v2 on development: results (added after the 15:45 deadline)
 
-**Not finished at submission time (15:45 deadline).** The v2 development run was frozen at tag `v2-frozen` and started at 15:10. It was still running live against the local model when this was pushed. Its report will land in `runs/v2_development_*.json`, and `scripts/compare_runs.py` produces the per-metric, per-label, per-answer and per-claim regression comparison against v1 under identical scoring rules. No v2 numbers are claimed here.
+Run `runs/v2_development_20261021T094025Z.json` (tag `v2-frozen`). The data, evaluator, provider, model and settings are the same as v1. The full comparison is in `reports/comparison.md` (produced by `scripts/compare_runs.py`).
 
-## 5. Final-check runs (A41–A50)
+| metric | v1 | v2 | delta |
+|---|---|---|---|
+| **joint F1 (main)** | **0.380** | **0.299** | **-0.081** |
+| joint precision / recall (coverage C/G) | 0.433 / 0.338 | 0.372 / 0.250 | -0.062 / -0.088 |
+| extraction F1 (P / R) | 0.604 (0.689 / 0.537) | 0.550 (0.684 / 0.460) | -0.054 |
+| macro F1 | 0.383 | 0.301 | -0.082 |
+| supported / contradicted / unknown F1 | 0.450 / 0.354 / 0.344 | 0.413 / 0.268 / 0.221 | -0.037 / -0.086 / -0.123 |
+| P / M / C / unmatched | 293 / 202 / 127 / 91 | 253 / 173 / 94 / 80 | |
+| answer errors | 18 | 20 | +2 |
 
-**Not run by the deadline.** The v1 check and v2 check runs are queued after v2 development (`scripts/run_eval.py --version v1|v2 --split check`). For check runs the code keeps G, M, C and every quality metric null (tested in `test_check_split_has_no_quality_metrics` and the API persistence test), and saves only predictions, errors, counts, timing and versions. I did no tuning on the final-check inputs.
+**The result is a regression, not a gain.** The targeted failure itself was fixed: **invented fact IDs went from 9 to 0**. Answers such as A06, A12 and A13, which v1 lost to invented IDs, now succeed. But errors from unparseable `<tool_call>` blocks rose **from 7 to 18**, and 2 quote-verbatim errors remain. Net answer errors went from 18 to 20: 9 answers went from error to ok (A06, A12, A13, A18, A23, A26, A27, A32, A36) and 11 went from ok to error (A04, A07, A09, A14, A15, A19, A24, A33, A35, A37, A38). At claim level, 43 gold claims were fixed and 76 regressed.
+
+**Trace-based diagnosis of the new failure.** v2 is the first version that logs a raw excerpt of unparseable output, so `reports/langfuse/v2_development.json` shows it. In all 18 cases the excerpt ends with `"}]}`: the model closes the claims array and the `arguments` object, then stops **one `}` short** of the `{"name": …, "arguments": {…}}` envelope. The schema change is the likely trigger. The 132-ID enum makes the tool signature much longer, and the 7B model loses track of brace depth at the end of a long call. That fits v1's smaller rate of the same error. I didn't repair the JSON, because the brief says malformed output must stay an error.
+
+On the answers that did *not* error, v1 has C/G 127/208 = 0.61 and v2 has 94/182 = 0.52. The two sets of answers differ, so this is only indicative, but it suggests the stricter fact-ID rule also pushed some labels towards `unknown`, as the drop in unknown precision shows (0.313 → 0.230).
+
+**Regressions inspected:** the claim-level transitions (correct→missed, correct→wrong_label and so on) and the full lists of regressed claim IDs are in `comparison.md`. Most correct→missed transitions come from the 11 answers that switched from ok to error.
+
+**What I'd do next (not done):** keep the fact-ID rule in the prompt but drop the schema enum, or remove the long-output failure mode altogether by having the model cite numbered sentences instead of copying them (already implemented in `app/validate.py` as `span_mode="sentence"` and tested, but not used). Either would need its own v3 measurement.
+
+## 5. Final-check runs A41–A50 (added after the 15:45 deadline)
+
+Both versions were frozen (tags `v1-frozen` and `v2-frozen`) before these runs and were not tuned on the check inputs. G, M, C and every quality metric are **null**: the reviewer scores these from the saved outputs with the private key. The Langfuse check traces carry predictions and failures, but **no** quality or correctness scores (0 scores in `reports/langfuse/v1_check.json` and `reports/langfuse/v2_check.json`).
+
+| run | file | accepted predictions | answer errors | wall time |
+|---|---|---|---|---|
+| v1 check | `runs/v1_check_20261021T101540Z.json` | 72 | 5 / 10 | 547 s |
+| v2 check | `runs/v2_check_20261021T102448Z.json` | 86 | 3 / 10 | 534 s |
+
+- v1 errors: A41 and A44 (quote not verbatim), A47 and A50 (invented fact IDs `stonewave.max.shipping_free` and `cleartrail.plus.material`, the same pattern diagnosed on development), A48 (unparseable tool call).
+- v2 errors: A42, A43 and A46, all unparseable tool calls (the missing-final-brace pattern from §4). There are no invented IDs.
+
+The Postgres rows for all four runs are listed in `reports/db_runs.txt`. Both check runs record source revision `d6bbb6e`, a commit that only touched reports; `git diff v2-frozen d6bbb6e -- app` is empty, so the agent code was frozen.
+
+Post-deadline fix: `finish_run` used to store an absent value as the JSON literal `null` instead of SQL NULL. It now stores SQL NULL, and the existing rows were updated in place, so `runs.metrics IS NULL` holds for both check runs. The API test asserts this.
 
 ## 6. Verification, AI assistance, time, limitations
 
@@ -87,3 +119,4 @@ Also added, as observability only (applies to both versions): when a `<tool_call
 - 7B local model quality: there's lots of over-extraction of advice sentences and contradicted→supported confusion. The next change I'd make is an extraction rule or classifier step for advice and instruction sentences.
 - The 7 nondeterministic malformed tool-call outputs are not addressed by v2.
 - No Langfuse UI screenshots; the JSON exports and trace IDs are provided instead (the instance is local).
+- §4 and §5 were completed after the 15:45 deadline, using runs that started before it from the frozen tags. Nothing in §1–3 was changed afterwards.

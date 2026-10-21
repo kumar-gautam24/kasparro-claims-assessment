@@ -1,4 +1,4 @@
-# uv run pytest -v   (2026-10-21 15:10 IST, commit ac71526, Docker appdb up)
+# uv run pytest -v   (2026-10-21 16:04 IST, Docker appdb up)
 ============================= test session starts ==============================
 platform darwin -- Python 3.13.14, pytest-9.1.1, pluggy-1.7.0 -- /Users/gautam/Downloads/assesment/.venv/bin/python3
 rootdir: /Users/gautam/Downloads/assesment
@@ -72,4 +72,4 @@ tests/test_scorer.py::test_check_split_quality_stays_null PASSED         [100%]
     from starlette.testclient import TestClient as TestClient  # noqa
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 57 passed, 1 warning in 2.51s =========================
+======================== 57 passed, 1 warning in 2.53s =========================

@@ -140,6 +140,14 @@ def test_evaluation_run_persists_success_empty_and_error_answers(client, monkeyp
     assert answers["A43"]["status"] == "error" and answers["A43"]["error"]["type"] == "invalid_output"
     assert run["file_hashes"]["answers.csv"]
 
+    async def metrics_is_sql_null():
+        conn = await db.connect()
+        cur = await conn.execute("SELECT metrics IS NULL AS n FROM runs WHERE run_id = %s", (body["run_id"],))
+        row = await cur.fetchone()
+        await conn.close()
+        return row["n"]
+    assert asyncio.run(metrics_is_sql_null())
+
 
 @needs_db
 def test_db_constraints_reject_duplicate_answer_and_span():

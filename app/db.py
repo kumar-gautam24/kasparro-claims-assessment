@@ -12,6 +12,11 @@ from psycopg.types.json import Jsonb
 SCHEMA = (Path(__file__).resolve().parent / "schema.sql").read_text()
 
 
+def _jsonb(value):
+    """None -> SQL NULL (not the JSON literal null), so 'metrics IS NULL' holds for check runs."""
+    return None if value is None else Jsonb(value)
+
+
 def database_url() -> str:
     return os.getenv("DATABASE_URL", "postgresql://claims:claims@localhost:5433/claims")
 
@@ -45,7 +50,7 @@ async def save_answer(conn, run_id: uuid.UUID, row: dict, claims: list[dict]) ->
             (run_id, row["answer_id"], row["brand_id"], row["status"],
              (row.get("error") or {}).get("type"), (row.get("error") or {}).get("message"),
              len(claims), row["latency_ms"], row["model_turns"], row["attempts"],
-             Jsonb(row.get("usage")), row.get("trace_id"), Jsonb(row.get("scores"))),
+             _jsonb(row.get("usage")), row.get("trace_id"), _jsonb(row.get("scores"))),
         )
         for c in claims:
             await conn.execute(
@@ -53,7 +58,7 @@ async def save_answer(conn, run_id: uuid.UUID, row: dict, claims: list[dict]) ->
                        label, fact_ids, reason, gold_match)
                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 (run_id, row["answer_id"], c["claim_id"], c["start_char"], c["end_char"], c["quote"],
-                 c["label"], Jsonb(c["fact_ids"]), c["reason"], Jsonb(c.get("gold_match"))),
+                 c["label"], Jsonb(c["fact_ids"]), c["reason"], _jsonb(c.get("gold_match"))),
             )
 
 
@@ -62,7 +67,7 @@ async def finish_run(conn, run_id: uuid.UUID, status: str, counts: dict | None, 
     await conn.execute(
         """UPDATE runs SET status = %s, counts = %s, metrics = %s, report = %s, failure = %s, finished_at = now()
            WHERE run_id = %s""",
-        (status, Jsonb(counts), Jsonb(metrics), Jsonb(report), failure, run_id),
+        (status, _jsonb(counts), _jsonb(metrics), _jsonb(report), failure, run_id),
     )
 
 
