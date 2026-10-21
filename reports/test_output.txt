@@ -1,0 +1,75 @@
+# uv run pytest -v   (2026-10-21 15:10 IST, commit ac71526, Docker appdb up)
+============================= test session starts ==============================
+platform darwin -- Python 3.13.14, pytest-9.1.1, pluggy-1.7.0 -- /Users/gautam/Downloads/assesment/.venv/bin/python3
+rootdir: /Users/gautam/Downloads/assesment
+configfile: pyproject.toml
+testpaths: tests
+plugins: asyncio-1.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 57 items
+
+tests/test_agent.py::test_happy_path_uses_tool_then_submits PASSED       [  1%]
+tests/test_agent.py::test_valid_empty_claims_is_ok PASSED                [  3%]
+tests/test_agent.py::test_bad_output_is_answer_error_not_unknown[bad0-invalid_output] PASSED [  5%]
+tests/test_agent.py::test_bad_output_is_answer_error_not_unknown[bad1-invalid_output] PASSED [  7%]
+tests/test_agent.py::test_bad_output_is_answer_error_not_unknown[bad2-invalid_output] PASSED [  8%]
+tests/test_agent.py::test_malformed_submit_arguments PASSED              [ 10%]
+tests/test_agent.py::test_illegal_tool_is_error_and_not_executed PASSED  [ 12%]
+tests/test_agent.py::test_unknown_requested_brand_is_error PASSED        [ 14%]
+tests/test_agent.py::test_unknown_primary_brand_never_calls_model PASSED [ 15%]
+tests/test_agent.py::test_turn_exhaustion PASSED                         [ 17%]
+tests/test_agent.py::test_timeout_retried_once_then_error PASSED         [ 19%]
+tests/test_agent.py::test_rate_limit_retried_then_succeeds PASSED        [ 21%]
+tests/test_agent.py::test_nonretryable_errors_not_retried[auth-auth] PASSED [ 22%]
+tests/test_agent.py::test_nonretryable_errors_not_retried[malformed-invalid_output] PASSED [ 24%]
+tests/test_agent.py::test_nonretryable_errors_not_retried[permanent-provider_error] PASSED [ 26%]
+tests/test_agent.py::test_concurrency_capped_at_three_including_retries PASSED [ 28%]
+tests/test_agent.py::test_failure_isolation_and_sorted_outputs PASSED    [ 29%]
+tests/test_agent.py::test_gold_never_enters_model_or_tool_payloads PASSED [ 31%]
+tests/test_agent.py::test_v2_constrains_fact_ids_to_catalogue_and_keeps_quote_spans PASSED [ 33%]
+tests/test_agent.py::test_check_split_has_no_quality_metrics PASSED      [ 35%]
+tests/test_api.py::test_classify_200 PASSED                              [ 36%]
+tests/test_api.py::test_classify_rejects_gold_or_claim_fields_422[extra0] PASSED [ 38%]
+tests/test_api.py::test_classify_rejects_gold_or_claim_fields_422[extra1] PASSED [ 40%]
+tests/test_api.py::test_classify_rejects_gold_or_claim_fields_422[extra2] PASSED [ 42%]
+tests/test_api.py::test_classify_invalid_version_422 PASSED              [ 43%]
+tests/test_api.py::test_classify_unknown_brand_404 PASSED                [ 45%]
+tests/test_api.py::test_classify_invalid_output_502 PASSED               [ 47%]
+tests/test_api.py::test_classify_provider_error_502 PASSED               [ 49%]
+tests/test_api.py::test_classify_timeout_504 PASSED                      [ 50%]
+tests/test_api.py::test_get_run_invalid_uuid_422 PASSED                  [ 52%]
+tests/test_api.py::test_get_run_missing_404 PASSED                       [ 54%]
+tests/test_api.py::test_evaluation_run_persists_success_empty_and_error_answers PASSED [ 56%]
+tests/test_api.py::test_db_constraints_reject_duplicate_answer_and_span PASSED [ 57%]
+tests/test_data_validate.py::test_csv_quoted_commas_and_embedded_newlines PASSED [ 59%]
+tests/test_data_validate.py::test_issued_csvs_parse_and_gold_offsets_match_exact_text PASSED [ 61%]
+tests/test_data_validate.py::test_every_gold_span_is_a_deterministic_sentence PASSED [ 63%]
+tests/test_data_validate.py::test_boolean_parsing_is_not_python_truthiness PASSED [ 64%]
+tests/test_data_validate.py::test_fact_tool_returns_version_and_rejects_unknown_brand PASSED [ 66%]
+tests/test_data_validate.py::test_quote_located_and_claim_id_derived PASSED [ 68%]
+tests/test_data_validate.py::test_repeated_quote_resolved_in_reading_order PASSED [ 70%]
+tests/test_data_validate.py::test_invalid_claims_rejected[raw0-not found] PASSED [ 71%]
+tests/test_data_validate.py::test_invalid_claims_rejected[raw1-label] PASSED [ 73%]
+tests/test_data_validate.py::test_invalid_claims_rejected[raw2-fact_ids] PASSED [ 75%]
+tests/test_data_validate.py::test_overlapping_quotes_rejected PASSED     [ 77%]
+tests/test_data_validate.py::test_sentence_mode_and_out_of_range PASSED  [ 78%]
+tests/test_data_validate.py::test_validate_offsets_quote_ids_overlap PASSED [ 80%]
+tests/test_scorer.py::test_perfect_output PASSED                         [ 82%]
+tests/test_scorer.py::test_assessment_arithmetic_example_g10_p10_m8_c7 PASSED [ 84%]
+tests/test_scorer.py::test_missed_claims_reduce_recall_only PASSED       [ 85%]
+tests/test_scorer.py::test_extra_advice_sentence_reduces_precision PASSED [ 87%]
+tests/test_scorer.py::test_wrong_labels_count_fp_and_fn_per_label PASSED [ 89%]
+tests/test_scorer.py::test_provider_error_answer_keeps_gold_as_missed PASSED [ 91%]
+tests/test_scorer.py::test_valid_empty_predictions_get_zero_credit PASSED [ 92%]
+tests/test_scorer.py::test_empty_split_has_null_metrics PASSED           [ 94%]
+tests/test_scorer.py::test_missing_and_duplicate_outcomes_rejected PASSED [ 96%]
+tests/test_scorer.py::test_quote_mismatch_rejected_before_matching PASSED [ 98%]
+tests/test_scorer.py::test_check_split_quality_stays_null PASSED         [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.13/site-packages/fastapi/testclient.py:1
+  /Users/gautam/Downloads/assesment/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 57 passed, 1 warning in 2.51s =========================

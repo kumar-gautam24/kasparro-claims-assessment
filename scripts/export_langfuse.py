@@ -33,7 +33,7 @@ def main(report_path: str, out_path: str) -> None:
                 continue
             obs = get(client, "/api/public/v2/observations", traceId=tid, limit=100,
                       fields="core,basic,io,usage,metadata,model")
-            scores = get(client, "/api/public/v2/scores", traceId=tid, limit=100)
+            scores = get(client, "/api/public/v3/scores", traceId=tid, limit=100)
             traces.append({
                 "answer_id": a["answer_id"], "trace_id": tid, "trace_url": a.get("trace_url"),
                 "observations": [{k: o.get(k) for k in keep_obs if k in o} for o in obs],

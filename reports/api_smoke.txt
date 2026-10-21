@@ -1,0 +1,42 @@
+# API smoke test against the live v1 development run stored in PostgreSQL (2026-10-21 15:11:03)
+
+$ curl -s localhost:8765/evaluation-runs/2aecd3f5-d72d-4a56-b1a2-39ca91ed5f8c | (summary)
+{
+ "run_id": "2aecd3f5-d72d-4a56-b1a2-39ca91ed5f8c",
+ "agent_version": "v1",
+ "split": "development",
+ "status": "completed",
+ "provider": "ollama",
+ "model": "qwen2.5:7b",
+ "source_revision": "823f744670780a41c90325f9081ccb297219778d",
+ "counts": {
+  "C": 127,
+  "G": 376,
+  "M": 202,
+  "P": 293,
+  "answers": 40,
+  "answer_errors": 18,
+  "confusion_total": 467,
+  "unmatched_predictions": 91
+ }
+}
+answers: 40 ordered: True errors: 18 claim rows: 293
+metrics.joint: {'f1': 0.3796711509715994, 'recall': 0.3377659574468085, 'precision': 0.4334470989761092}
+example error answer: {"answer_id": "A01", "status": "error", "error": {"type": "invalid_output", "message": "claim 5: unknown fact_ids ['cleartrail.mini.return_policy']"}, "n_claims": 0}
+example claim: {"claim_id": "A03:335:505", "start_char": 335, "end_char": 505, "quote": "Orders for CloudNote Air receive free delivery to every India postal code, so there is no separate shipping charge even when a customer selects a remote delivery address.", "label": "unknown", "fact_ids": [], "reason": "The fact does not specify the conditions or the date, and the statement is not contradicted by the officia
+
+$ curl -i localhost:8765/evaluation-runs/00000000-0000-0000-0000-000000000000
+{"error":{"type":"not_found","message":"evaluation run not found"}} HTTP 404
+$ curl -i localhost:8765/evaluation-runs/not-a-uuid
+{"error":{"type":"validation_error","message":"invalid request fields: run_id"}} HTTP 422
+$ POST /classify with unknown brand
+{"error":{"type":"unknown_brand","message":"unknown brand_id 'acme'"}} HTTP 404
+$ POST /classify with a gold field
+{"error":{"type":"validation_error","message":"invalid request fields: expected_label"}} HTTP 422
+
+$ psql row counts for this run
+ answers | claims | matched_claims 
+---------+--------+----------------
+      40 |    293 |            202
+(1 row)
+
