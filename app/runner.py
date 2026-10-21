@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app import db
-from app.agent import AgentInput, AgentResult, Executor, SPAN_MODE
+from app.agent import VERSIONS, AgentInput, AgentResult, Executor
 from app.config import (DATASET_VERSION, EVALUATOR_VERSION, FACT_VERSION, ROOT, RUNS_DIR, Settings)
 from app.data import Answer, GoldClaim, file_hashes, load_answers, load_gold
 from app.facts import FactStore
@@ -66,7 +66,7 @@ async def run_split(
     started = datetime.now(timezone.utc)
     meta = {
         "run_id": str(run_id), "agent_version": version, "split": split,
-        "prompt_version": f"{version}:{SPAN_MODE[version]}", "dataset_version": DATASET_VERSION,
+        "prompt_version": f"{version}:" + ",".join(f"{k}={v}" for k, v in VERSIONS[version].items()), "dataset_version": DATASET_VERSION,
         "evaluator_version": EVALUATOR_VERSION, "fact_version": FACT_VERSION,
         "provider": provider.name, "model": provider.model, "settings": settings.public(),
         "file_hashes": file_hashes(), "source_revision": source_revision(),

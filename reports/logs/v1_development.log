@@ -1,0 +1,45 @@
+{
+ "run_id": "2aecd3f5-d72d-4a56-b1a2-39ca91ed5f8c",
+ "report": "/Users/gautam/Downloads/assesment/runs/v1_development_20261021T084001Z.json",
+ "counts": {
+  "answers": 40,
+  "answer_errors": 18,
+  "G": 376,
+  "P": 293,
+  "M": 202,
+  "C": 127,
+  "unmatched_predictions": 91,
+  "confusion_total": 467
+ },
+ "metrics": {
+  "extraction": {
+   "precision": 0.689419795221843,
+   "recall": 0.5372340425531915,
+   "f1": 0.6038863976083707
+  },
+  "joint": {
+   "precision": 0.4334470989761092,
+   "recall": 0.3377659574468085,
+   "f1": 0.3796711509715994
+  },
+  "gold_coverage": 0.3377659574468085,
+  "per_label": {
+   "supported": {
+    "precision": 0.5280898876404494,
+    "recall": 0.39166666666666666,
+    "f1": 0.44976076555023925
+   },
+   "contradicted": {
+    "precision": 0.7368421052631579,
+    "recall": 0.23333333333333334,
+    "f1": 0.35443037974683544
+   },
+   "unknown": {
+    "precision": 0.3132530120481928,
+    "recall": 0.38235294117647056,
+    "f1": 0.3443708609271523
+   }
+  },
+  "macro_f1": 0.38285400207474235
+ }
+}

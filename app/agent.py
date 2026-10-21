@@ -12,7 +12,12 @@ from app.providers.base import Provider, ProviderError, Turn
 from app.tracing import Tracer, _NullObs
 from app.validate import Claim, InvalidOutputError, build_claims, sentence_spans
 
-SPAN_MODE = {"v1": "quote", "v2": "sentence"}
+# The only v1 -> v2 behaviour change is fact-ID grounding (prompt rule + schema enum); see reports/REPORT.md.
+VERSIONS = {
+    "v1": {"span_mode": "quote", "fact_id_enum": False},
+    "v2": {"span_mode": "quote", "fact_id_enum": True},
+}
+SPAN_MODE = {v: c["span_mode"] for v, c in VERSIONS.items()}
 ALLOWED_TOOLS = frozenset({GET_BRAND_FACTS, SUBMIT_CLAIMS})
 
 
@@ -90,7 +95,8 @@ class Executor:
         self.semaphore = semaphore or asyncio.Semaphore(settings.max_concurrency)
         self.system = load_prompt(version)
         self.span_mode = SPAN_MODE[version]
-        self.tools = [get_brand_facts_schema(facts.brands), submit_claims_schema(self.span_mode)]
+        enum = sorted(facts.fact_ids) if VERSIONS[version]["fact_id_enum"] else None
+        self.tools = [get_brand_facts_schema(facts.brands), submit_claims_schema(self.span_mode, enum)]
 
     async def _model_turn(self, messages: list[dict], force: list[str] | None, obs, turn_no: int, result: AgentResult) -> Turn:
         last_exc: ProviderError | None = None
@@ -116,7 +122,8 @@ class Executor:
                 last_exc = exc
             except Exception as exc:  # unexpected SDK failure: not retried
                 last_exc = ProviderError("permanent", f"provider failure: {type(exc).__name__}")
-            gen.update(level="ERROR", status_message=f"{last_exc.kind}: {last_exc.message}")
+            gen.update(level="ERROR", status_message=f"{last_exc.kind}: {last_exc.message}",
+                       output={"raw_output_excerpt": getattr(last_exc, "raw_excerpt", None)})
             gen.end()
             if not last_exc.retryable or attempt == self.settings.max_attempts_per_turn:
                 break

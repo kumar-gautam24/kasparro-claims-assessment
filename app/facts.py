@@ -51,12 +51,16 @@ _CLAIM_COMMON = {
 }
 
 
-def submit_claims_schema(span_mode: str) -> dict:
-    """span_mode 'quote' (v1): model copies the sentence; 'sentence' (v2): model cites a sentence number."""
+def submit_claims_schema(span_mode: str, fact_id_enum: list[str] | None = None) -> dict:
+    """span_mode 'quote': model copies the sentence; 'sentence': model cites a sentence number.
+    fact_id_enum (v2): restrict fact_ids to catalogue IDs in the tool schema."""
     if span_mode == "quote":
         locator = {"quote": {"type": "string", "description": "The full factual sentence copied exactly, with its final punctuation."}}
     else:
         locator = {"sentence": {"type": "integer", "description": "Number of the factual sentence in the numbered list."}}
+    common = dict(_CLAIM_COMMON)
+    if fact_id_enum is not None:
+        common["fact_ids"] = {"type": "array", "items": {"type": "string", "enum": sorted(fact_id_enum)}}
     return {
         "name": SUBMIT_CLAIMS,
         "description": "Submit the final list of factual claim sentences with labels. Call exactly once, after looking up facts.",
@@ -67,7 +71,7 @@ def submit_claims_schema(span_mode: str) -> dict:
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "properties": {**locator, **_CLAIM_COMMON},
+                        "properties": {**locator, **common},
                         "required": [*locator, "label", "fact_ids", "reason"],
                     },
                 }

@@ -86,7 +86,10 @@ class OllamaProvider:
                 obj = json.loads(block)
                 calls.append(ToolCall(id=f"call_{i}", name=str(obj["name"]), args=obj.get("arguments", {})))
             except (ValueError, KeyError, TypeError) as exc:
-                raise ProviderError("malformed", "model emitted an unparseable <tool_call> block") from exc
+                perr = ProviderError("malformed", "model emitted an unparseable <tool_call> block")
+                pos = getattr(exc, "pos", None)
+                perr.raw_excerpt = block[max(0, pos - 300):pos + 120] if isinstance(pos, int) else block[:400]
+                raise perr from exc
         rest = re.sub(r"<tool_call>.*?(?:</tool_call>|$)", "", text, flags=re.S).strip()
         return calls, rest or None
 

@@ -157,11 +157,17 @@ async def test_gold_never_enters_model_or_tool_payloads():
         assert g.explanation not in blob
 
 
-async def test_v2_sentence_mode_derives_spans_in_python():
-    p, e = ex([lookup(), submit([{"sentence": 2, "label": "supported", "fact_ids": [], "reason": "x"}])], version="v2")
+async def test_v2_constrains_fact_ids_to_catalogue_and_keeps_quote_spans():
+    p, e = ex([lookup(), submit([GOOD_CLAIM])], version="v2")
     r = await e.run(INP)
     assert r.status == "ok" and r.claims[0].quote == GOOD_CLAIM["quote"]
-    assert "[2] ClearTrail Mini costs" in p.payloads[0]["messages"][0]["content"]
+    submit_schema = next(t for t in p.payloads[0]["tools"] if t["name"] == "submit_claims")
+    enum = submit_schema["parameters"]["properties"]["claims"]["items"]["properties"]["fact_ids"]["items"]["enum"]
+    assert set(enum) == FACTS.fact_ids
+    assert "never construct, rename or guess an ID" in p.payloads[0]["system"]
+    _, e1 = ex([lookup(), submit([GOOD_CLAIM])], version="v1")
+    v1_schema = next(t for t in e1.tools if t["name"] == "submit_claims")
+    assert "enum" not in v1_schema["parameters"]["properties"]["claims"]["items"]["properties"]["fact_ids"]["items"]
 
 
 async def test_check_split_has_no_quality_metrics():
