@@ -36,8 +36,8 @@ OLLAMA_NUM_PARALLEL=3 OLLAMA_FLASH_ATTENTION=1 ollama serve &
 ollama pull qwen2.5:7b
 ```
 
-`DATABASE_URL` defaults to `postgresql://claims:claims@localhost:5433/claims` (the `appdb` service). The schema is created on first use from `app/schema.sql`.
-Langfuse UI: http://localhost:3000 (headless-init demo login `admin@example.com` / `localdemo123`; project keys `pk-lf-local-demo` / `sk-lf-local-demo` are local-only demo values set in `docker-compose.yml`).
+Every credential (the app DB password, `DATABASE_URL`, the Langfuse project keys and admin login, and the internal service passwords) comes from `.env`. `docker compose` refuses to start while one is missing. Nothing secret is committed. `DATABASE_URL` points at the `appdb` service (`postgresql://claims:<APP_DB_PASSWORD>@localhost:5433/claims`), and the schema is created on first use from `app/schema.sql`.
+Langfuse UI: http://localhost:3000. Log in with `LF_ADMIN_EMAIL` / `LF_ADMIN_PASSWORD` from your `.env`; the project and its API keys are created headlessly from `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY`.
 
 Pinned key versions: fastapi 0.156.6, pydantic 2.14.1, psycopg 3.3.6, langfuse 5.0.4 (server image `langfuse:4`), google-genai 2.32.0, httpx 0.28.1, pytest 9.1.1, pytest-asyncio 1.4.0, Ollama 0.40.7 with `qwen2.5:7b` (845dbda0ea48). See `uv.lock` for the rest.
 

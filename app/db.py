@@ -9,6 +9,8 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+import app.config  # noqa: F401  (loads .env)
+
 SCHEMA = (Path(__file__).resolve().parent / "schema.sql").read_text()
 
 
@@ -18,7 +20,10 @@ def _jsonb(value):
 
 
 def database_url() -> str:
-    return os.getenv("DATABASE_URL", "postgresql://claims:claims@localhost:5433/claims")
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        raise RuntimeError("DATABASE_URL is not set (see .env.example)")
+    return url
 
 
 async def connect(url: str | None = None) -> psycopg.AsyncConnection:
