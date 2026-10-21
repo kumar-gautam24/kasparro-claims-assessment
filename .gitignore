@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+# originals as received (the copies under data/ are byte-identical, see data/SHA256SUMS)
+/answers.csv
+/brand_facts.csv
+/development_gold.csv
+/Assessment.docx
+/*.jpeg

@@ -1,0 +1,25 @@
+[project]
+name = "claim-classifier"
+version = "0.1.0"
+description = "Kasparro FSE I assessment: extract and classify factual claims in long AI answers"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "fastapi>=0.156.6",
+    "google-genai>=2.32.0",
+    "httpx>=0.28.1",
+    "langfuse>=5.0.4",
+    "psycopg[binary,pool]>=3.3.6",
+    "pydantic>=2.14.1",
+    "python-dotenv>=1.2.4",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
